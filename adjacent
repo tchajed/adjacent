@@ -23,7 +23,7 @@ def pad_to(s, w):
 
 if __name__ == "__main__":
   import argparse
-  import os
+  import itertools
 
   parser = argparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -45,6 +45,6 @@ if __name__ == "__main__":
     args.file1 = args.file1.readlines()
     width = max([printed_width(l) for l in args.file1])
 
-  for l1, l2 in zip(args.file1, args.file2):
+  for l1, l2 in itertools.zip_longest(args.file1, args.file2, fillvalue='\n'):
     l1 = l1.rstrip('\n')
     print(pad_to(l1, width), l2, sep=args.sep, end="")
