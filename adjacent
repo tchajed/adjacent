@@ -21,6 +21,13 @@ def printed_width(s):
 def pad_to(s, w):
   return s + " " * (w - printed_width(s))
 
+def open_files(names):
+  return [open(n, "r") for n in names]
+
+def close_files(fhs):
+  for fh in fhs:
+    fh.close()
+
 if __name__ == "__main__":
   import argparse
   import itertools
@@ -33,18 +40,24 @@ if __name__ == "__main__":
   parser.add_argument('--sep',
                       default="",
                       help="column separator string")
-  parser.add_argument("file1", type=argparse.FileType())
-  parser.add_argument("file2", type=argparse.FileType())
+  parser.add_argument("files", nargs='+')
 
   args = parser.parse_args()
+  num_files = len(args.files)
 
-  # compute file1 width
-  width = args.width//2
-  if width == 0:
-    # materialize file1 since we'll read it twice
-    args.file1 = args.file1.readlines()
-    width = max([printed_width(l) for l in args.file1])
+  # compute file widths (except for last)
+  if args.width == 0:
+    fhs = open_files(args.files)
+    widths = [max([printed_width(l) for l in fh]) for fh in fhs]
+    close_files(fhs)
+  else:
+    widths = [args.width//2 for _ in range(num_files-1)]
 
-  for l1, l2 in itertools.zip_longest(args.file1, args.file2, fillvalue='\n'):
-    l1 = l1.rstrip('\n')
-    print(pad_to(l1, width), l2, sep=args.sep, end="")
+  fhs = open_files(args.files)
+  for lines in itertools.zip_longest(*fhs, fillvalue='\n'):
+    file_lines = []
+    for i in range(num_files-1):
+      file_lines.append(pad_to(lines[i].rstrip('\n'), widths[i]))
+    file_lines.append(lines[-1])
+    print(*file_lines, sep=args.sep, end="")
+  close_files(fhs)
