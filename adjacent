@@ -1,0 +1,34 @@
+#!/usr/bin/env python3
+
+from __future__ import print_function
+
+def pad_to(s, w):
+  return s + " " * (w - len(s))
+
+if __name__ == "__main__":
+  import argparse
+  import os
+
+  parser = argparse.ArgumentParser(
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+  parser.add_argument('-w', '--width',
+                      default=0,
+                      help="total width to aim for (0 to use first file)")
+  parser.add_argument('--sep',
+                      default="",
+                      help="column separator string")
+  parser.add_argument("file1", type=argparse.FileType())
+  parser.add_argument("file2", type=argparse.FileType())
+
+  args = parser.parse_args()
+
+  # compute file1 width
+  width = args.width//2
+  if width == 0:
+    # materialize file1 since we'll read it twice
+    args.file1 = args.file1.readlines()
+    width = max([len(l) for l in args.file1])
+
+  for l1, l2 in zip(args.file1, args.file2):
+    l1 = l1.rstrip('\n')
+    print(pad_to(l1, width), l2, sep=args.sep, end="")
