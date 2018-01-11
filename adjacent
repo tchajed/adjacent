@@ -39,8 +39,13 @@ if __name__ == "__main__":
                       type=int,
                       help="total width to aim for (0 to use first file)")
   parser.add_argument('--sep',
-                      default="",
+                      default=" ",
                       help="column separator string")
+  parser.add_argument('--sep-count',
+                      metavar='COUNT',
+                      default=0,
+                      type=int,
+                      help="number of times to repeat column separator")
   parser.add_argument("files", nargs='+')
 
   args = parser.parse_args()
@@ -60,5 +65,5 @@ if __name__ == "__main__":
     for i in range(num_files-1):
       file_lines.append(pad_to(lines[i].rstrip('\n'), widths[i]))
     file_lines.append(lines[-1])
-    print(*file_lines, sep=args.sep, end="")
+    print(*file_lines, sep=args.sep * args.sep_count, end="")
   close_files(fhs)
