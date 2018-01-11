@@ -36,6 +36,7 @@ if __name__ == "__main__":
     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
   parser.add_argument('-w', '--width',
                       default=0,
+                      type=int,
                       help="total width to aim for (0 to use first file)")
   parser.add_argument('--sep',
                       default="",
@@ -51,7 +52,7 @@ if __name__ == "__main__":
     widths = [max([printed_width(l) for l in fh]) for fh in fhs]
     close_files(fhs)
   else:
-    widths = [args.width//2 for _ in range(num_files-1)]
+    widths = [args.width//num_files for _ in range(num_files-1)]
 
   fhs = open_files(args.files)
   for lines in itertools.zip_longest(*fhs, fillvalue='\n'):
