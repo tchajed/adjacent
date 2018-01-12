@@ -46,7 +46,7 @@ if __name__ == "__main__":
                       help="column separator string")
   parser.add_argument('--sep-count',
                       metavar='COUNT',
-                      default=0,
+                      default=1,
                       type=int,
                       help="number of times to repeat column separator")
   parser.add_argument("files", nargs='+')
