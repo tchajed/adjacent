@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from __future__ import print_function
+import itertools
 
 import re
 
@@ -24,16 +25,20 @@ def printed_width(s):
 def pad_to(s, w):
   return s + " " * (w - printed_width(s))
 
-def open_files(names):
-  return [open(n, "r") for n in names]
-
-def close_files(fhs):
-  for fh in fhs:
-    fh.close()
+def open_files(names, headers=False):
+  fs = []
+  for n in names:
+    if headers:
+      lines = [n + "\n"]
+    else:
+      lines = []
+    with open(n, "r") as f:
+      lines.extend(f.readlines())
+    fs.append(lines)
+  return fs
 
 if __name__ == "__main__":
   import argparse
-  import itertools
 
   parser = argparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -49,6 +54,9 @@ if __name__ == "__main__":
                       default=1,
                       type=int,
                       help="number of times to repeat column separator")
+  parser.add_argument('-n', '--header',
+                      action='store_true',
+                      help="print header with filename")
   parser.add_argument("files", nargs='+')
 
   args = parser.parse_args()
@@ -56,13 +64,12 @@ if __name__ == "__main__":
 
   # compute file widths (except for last)
   if args.width == 0:
-    fhs = open_files(args.files)
-    widths = [max([printed_width(l) for l in fh]) for fh in fhs]
-    close_files(fhs)
+    fs = open_files(args.files, headers=args.header)
+    widths = [max([printed_width(l) for l in lines]) for lines in fs]
   else:
     widths = [args.width//num_files for _ in range(num_files-1)]
 
-  fhs = open_files(args.files)
+  fhs = open_files(args.files, headers=args.header)
   for lines in itertools.zip_longest(*fhs, fillvalue='\n'):
     file_lines = []
     for i in range(num_files-1):
@@ -70,4 +77,3 @@ if __name__ == "__main__":
       file_lines.append(pad_to(line, widths[i]))
     file_lines.append(lines[-1])
     print(*file_lines, sep=args.sep * args.sep_count, end="")
-  close_files(fhs)
